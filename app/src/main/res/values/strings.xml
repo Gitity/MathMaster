@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">Math Master</string>
+    <string name="arithmetic_btn">Arithmetic</string>
+    <string name="addition_btn">Addition</string>
+    <string name="subtraction_btn">Subtraction</string>
+    <string name="multiplication_btn">Multiplication</string>
+    <string name="division_btn">Division</string>
+
+    <string name="numPad1">1</string>
+    <string name="numPad2">2</string>
+    <string name="numPad3">3</string>
+    <string name="numPad4">4</string>
+    <string name="numPad5">5</string>
+    <string name="numPad6">6</string>
+    <string name="numPad7">7</string>
+    <string name="numPad8">8</string>
+    <string name="numPad9">9</string>
+    <string name="numPad0">0</string>
+    <string name="clearAnswerBtn">Clear Answer</string>
+</resources>

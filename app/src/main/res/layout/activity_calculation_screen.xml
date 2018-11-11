@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/constraintLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".CalculationScreen">
+
+    <Button
+        android:id="@+id/testBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="216dp"
+        android:layout_marginTop="388dp"
+        android:onClick="testBtn"
+        android:text="test"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/equationView"
+        android:layout_width="244dp"
+        android:layout_height="100dp"
+        android:layout_marginEnd="36dp"
+        android:layout_marginTop="16dp"
+        android:textAlignment="center"
+        android:textSize="70sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <android.support.v7.widget.GridLayout
+        android:id="@+id/numpadGridLayout"
+        android:layout_width="304dp"
+        android:layout_height="256dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/testBtn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/equationView">
+
+        <Button
+            android:id="@+id/numPad1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/numPad1"
+            app:layout_column="0"
+            app:layout_gravity="fill"
+            app:layout_row="0" />
+
+        <Button
+            android:id="@+id/numPad2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/numPad2"
+            app:layout_column="1"
+            app:layout_gravity="fill"
+            app:layout_row="0" />
+
+        <Button
+            android:id="@+id/numPad3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/numPad3"
+            app:layout_column="2"
+            app:layout_gravity="fill"
+            app:layout_row="0" />
+
+        <Button
+            android:id="@+id/numPad4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/numPad4"
+            app:layout_column="0"
+            app:layout_gravity="fill"
+            app:layout_row="1" />
+
+        <Button
+            android:id="@+id/numPad5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/numPad5"
+            app:layout_column="1"
+            app:layout_gravity="fill"
+            app:layout_row="1" />
+
+        <Button
+            android:id="@+id/numPad6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/numPad6"
+            app:layout_column="2"
+            app:layout_gravity="fill"
+            app:layout_row="1" />
+
+        <Button
+            android:id="@+id/numPad7"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/numPad7"
+            app:layout_column="0"
+            app:layout_gravity="fill"
+            app:layout_row="2" />
+
+        <Button
+            android:id="@+id/numPad8"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/numPad8"
+            app:layout_column="1"
+            app:layout_gravity="fill"
+            app:layout_row="2" />
+
+        <Button
+            android:id="@+id/numPad9"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/numPad9"
+            app:layout_column="2"
+            app:layout_gravity="fill"
+            app:layout_row="2" />
+
+        <Button
+            android:id="@+id/numPad0"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/numPad0"
+            app:layout_column="1"
+            app:layout_gravity="fill"
+            app:layout_row="3" />
+
+        <Button
+            android:id="@+id/numPadClear"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/clearAnswerBtn"
+            app:layout_column="1"
+            app:layout_gravity="fill"
+            app:layout_row="4" />
+    </android.support.v7.widget.GridLayout>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="300dp"
+        android:layout_height="20dp"
+        android:layout_marginBottom="15dp"
+        android:layout_marginEnd="261dp"
+        android:layout_marginStart="11dp"
+        android:progress="0"
+        app:layout_constraintBottom_toTopOf="@+id/equationView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.003"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.068" />
+
+    <ImageView
+        android:id="@+id/placeCube"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="15dp"
+        android:layout_marginStart="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@android:drawable/title_bar" />
+
+</android.support.constraint.ConstraintLayout>
