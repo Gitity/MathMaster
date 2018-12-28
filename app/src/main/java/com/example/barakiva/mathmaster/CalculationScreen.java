@@ -58,9 +58,9 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
     float density;
 
     //Classes
-    SessionDetails sessionDetails;
     Tick tick;
     ViewHelper viewHelper = new ViewHelper();
+    Exercise exercise = new Exercise();
 
     @Override
     protected void
@@ -107,8 +107,6 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
         clearAnswer = findViewById(R.id.numPadClear);
         //Helper classes
 
-        //Info
-        sessionDetails = new SessionDetails();
 
         clearAnswer.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -118,6 +116,10 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
         });
 
         System.out.println(sessionId);
+
+        //Session Over
+
+
     }
 
     public void handleOnClick(View v, ImageView asset) {
@@ -167,9 +169,6 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
                 if (flux.getDrillAmount() == amountOfDrills) {
                     pushTheProgressBar();
                     workoutHasEnded();
-                    sessionDetails.setSessionEndTime(System.currentTimeMillis());
-                    System.out.println("Good job, it only took you : " +
-                            (sessionDetails.getSessionEndTime() - sessionDetails.getSessionStartTime()));
                 } else {
                     pushTheProgressBar();
                     runOnce();
@@ -334,30 +333,20 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
 
     }
 
-    class SessionDetails{
-        private long sessionStartTime;
-        private long sessionEndTime;
-
-        public long getSessionEndTime() {
-            return sessionEndTime;
-        }
-        public void setSessionEndTime(long sessionEndTime) {
-            this.sessionEndTime = sessionEndTime;
-        }
-
-        public long getSessionStartTime() {
-            return sessionStartTime;
-        }
-        public void setSessionStartTime(long sessionStartTime) {
-            this.sessionStartTime = sessionStartTime;
-        }
-    }
-
     public void testBtn(View view) {
-        sessionDetails.setSessionStartTime(System.currentTimeMillis());
+        exercise.setBeginExerciseTimeStamp(exercise.getCurrentTime());
         runOnce();
+        openDialog();
+    }
+    public void openDialog() {
+        SessionDialog sessionDialog = new SessionDialog();
+        sessionDialog.setPassedContext(this);
+        sessionDialog.show(getFragmentManager(), "My Dialog");
+
     }
     public void workoutHasEnded() {
+        exercise.setEndExerciseTimeStamp(exercise.getCurrentTime());
+        System.out.println("Good job! It only took you " + exercise.getSessionLength() + " seconds!");
         System.out.println("Workout has ended! Good job!");
     }
 

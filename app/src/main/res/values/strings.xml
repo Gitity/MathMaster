@@ -17,4 +17,12 @@
     <string name="numPad9">9</string>
     <string name="numPad0">0</string>
     <string name="clearAnswerBtn">Clear Answer</string>
+
+    //Modal Strings
+    <string name="bestScoreLabel">Best Score</string>
+    <string name="bestScore">00</string>
+    <string name="currentScoreLabel">Your Score</string>
+    <string name="currentScore">00</string>
+    <string name="tryAgainLabel">Try Again</string>
+
 </resources>
