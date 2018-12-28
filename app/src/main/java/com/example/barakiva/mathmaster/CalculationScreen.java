@@ -1,8 +1,5 @@
 package com.example.barakiva.mathmaster;
 
-import android.animation.Animator;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Color;
@@ -10,27 +7,33 @@ import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.provider.ContactsContract;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import com.example.barakiva.mathmaster.animations.Tick;
+
 import java.util.Random;
 
 public class CalculationScreen extends AppCompatActivity implements View.OnClickListener {
+
+    //Elements
     Random random;
     ProgressBar progressBar;
     ConstraintLayout constraintLayout;
-    ImageView placeCube;
-
+    ImageView testCube;
+    //Buttons
     Button testBtn;
     Button numPad1;
     Button numPad2;
@@ -43,19 +46,21 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
     Button numPad9;
     Button numPad0;
     Button clearAnswer;
-
+    //
     TextView equationView;
     ImageView curvedTick;
 
     String numbersEntered = "";
     int result;
     int amountOfDrills = 5;
-    Flux flux = new Flux();;
+    Flux flux = new Flux();
 
     float density;
 
     //Classes
     SessionDetails sessionDetails;
+    Tick tick;
+    ViewHelper viewHelper = new ViewHelper();
 
     @Override
     protected void
@@ -64,16 +69,20 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
         setContentView(R.layout.activity_calculation_screen);
         String sessionId = getIntent().getStringExtra("Operation");
         random = new Random();
-
+        tick = new Tick(this.getApplicationContext());
         //Finding elements
         equationView = findViewById(R.id.equationView);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
-        placeCube = findViewById(R.id.placeCube);
+        constraintLayout = findViewById(R.id.constraintLayout);
         //Gameification
         curvedTick = new ImageView(this);
         curvedTick.setImageResource(R.drawable.curvedtick);
         curvedTick.setId(curvedTick.generateViewId());
         density = getResources().getDisplayMetrics().density;
+        //Testing
+        testCube = new ImageView(this);
+        testCube.setImageResource(R.drawable.gray25);
+        testCube.setId(testCube.generateViewId());
         //Assigning elements to code
         numPad1 = findViewById(R.id.numPad1);
         numPad1.setOnClickListener(this);
@@ -96,6 +105,8 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
         numPad0 = findViewById(R.id.numPad0);
         numPad0.setOnClickListener(this);
         clearAnswer = findViewById(R.id.numPadClear);
+        //Helper classes
+
         //Info
         sessionDetails = new SessionDetails();
 
@@ -109,13 +120,24 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
         System.out.println(sessionId);
     }
 
-    @Override
-    public void onClick(View v) {
+    public void handleOnClick(View v, ImageView asset) {
+        //Check if valid button
         if (v instanceof Button) {
             Button b = (Button) v;
             numbersEntered += b.getText();
-            generateCurvedTick(v);
-            animateCurvedTick(v, curvedTick);
+            if (!(viewHelper.hasParent(asset, this))) {
+                Log.d("GENERATED", "initiated");
+                generateAssetOnScreen(v, asset);
+            }
+            viewHelper.addView(asset, viewHelper.getViewLocation(v),
+                    viewHelper.getHeightOffset(this,constraintLayout), constraintLayout);
+
+            if (!tick.isAnimating()) {
+                tick.animateCurvedTick(v, asset, progressBar, constraintLayout);
+            } else {
+                Log.d("Animation state", "Tick is animating, please stand by");
+            }
+
             if (!isUserInTheRightDirection()) {
                 System.out.println("Wrong start");
                 startVibration();
@@ -126,10 +148,11 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
             System.out.println("This was not a button!");
         }
 
+        //Check if answer is true
         if (isUserDigitsEqualToEquationResult()) {
             if (Integer.parseInt(numbersEntered) == result) {
                 //Correct answer scenario
-//                generateCurvedTick(v);
+//                generateAssetOnScreen(v);
 //                animateCurvedTick(v);
                 Thread t = new Thread(){
                     public void run(){
@@ -159,7 +182,10 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
                 equationView.setTextColor(Color.RED);
             }
         }
-
+    }
+    @Override
+    public void onClick(View v) {
+        handleOnClick(v, testCube);
     }
 
     public void playCorrectAnswerSound() {
@@ -203,123 +229,16 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
         });
         valueAnimator.start();
     }
-    public void generateCurvedTick(View v) {
-        constraintLayout = findViewById(R.id.constraintLayout);
-        int[] arr = new int[2];
-        v.getLocationOnScreen(arr);
-        System.out.println(arr[0] + " x and y is " + arr[1]);
 
-        DisplayMetrics dm = new DisplayMetrics();
-        this.getWindowManager().getDefaultDisplay().getMetrics(dm);
-        int heightOffset = dm.heightPixels - constraintLayout.getMeasuredHeight();
-        //Restart the view
-        ConstraintSet removeSet = new ConstraintSet();
-        constraintLayout.removeView(curvedTick);
-
-        removeSet.clone(constraintLayout);
-        removeSet.clear(curvedTick.getId(), ConstraintSet.TOP);
-        removeSet.clear(curvedTick.getId(), ConstraintSet.LEFT);
-        removeSet.applyTo(constraintLayout);
-
-        constraintLayout.addView(curvedTick, 0);
-        curvedTick.setVisibility(View.VISIBLE);
-        ConstraintSet set = new ConstraintSet();
-        set.clone(constraintLayout);
-        set.connect(curvedTick.getId(),ConstraintSet.TOP, constraintLayout.getId(),ConstraintSet.TOP, arr[1] - heightOffset);
-        set.connect(curvedTick.getId(),ConstraintSet.LEFT, constraintLayout.getId(),ConstraintSet.LEFT, arr[0]);
-        set.applyTo(constraintLayout);
-        curvedTick.setElevation(1);
-//        curvedTick.setX(arr[0]);
-//        curvedTick.setY(arr[1] - heightOffset);
-
-        //Testing
-//        placeCube.setY(arr[1] - heightOffset);
-//        placeCube.setX(arr[0]);
-
-
-    }
-    public void animateCurvedTick(View v, ImageView asset) {
-        final ImageView assetFinal = asset;
-        //Height and width difference between progressbar and clicked btn
-        System.out.println("Progress bar Y is : " + progressBar.getY() +
-        "current view Y is : " + v.getY());
-
-        final float curvedTickWidth = curvedTick.getDrawable().getIntrinsicWidth();;
-        final float curvedTickHeight = curvedTick.getDrawable().getIntrinsicHeight();;
-        System.out.println("Curved tick height is  : " + curvedTickHeight);
-
-        final float height = v.getY() - progressBar.getY();
-        final float width = v.getX() - (progressBar.getX() + 100);
-
-
-        //fade
-
-        final ObjectAnimator fadeAlpha = ObjectAnimator.ofFloat(assetFinal,"alpha", 0);
-        fadeAlpha.setDuration(1250);
-
-        ValueAnimator myAnimator = ValueAnimator.ofFloat(0,1);
-        myAnimator.setDuration(2500);
-        myAnimator.setStartDelay(2500);
-        myAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                float value = ((Float) (animation.getAnimatedValue()))
-                        .floatValue();
-                if (animation.getCurrentPlayTime() >= 1500) {
-          //          fadeAlpha.start();
-                }
-                assetFinal.setTranslationX((float) (150 *Math.sin(value*Math.PI)));
-                assetFinal.setTranslationY((float) (150 *Math.cos(value*Math.PI) -100 ));
-            }
-        });
-        myAnimator.start();
-        myAnimator.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                constraintLayout.removeView(curvedTick);
-                curvedTick.setVisibility(View.INVISIBLE);
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-
-            }
-        });
-        //   constraintLayout.removeView(curvedTick);
-
-//        AnimatorSet fadeOut = new AnimatorSet();
-//        fadeOut.play(fadeAlpha);
-//        fadeOut.start();
-        //
-//        ObjectAnimator someAnimation = ObjectAnimator.ofFloat(imgView, "translationX",0);
-//        someAnimation.setDuration(1000);
-
-        //
-//        curvedTick.animate()
-//                .scaleX(0.3f)
-//                .scaleY(0.3f)
-//                .setDuration(2500)
-//                .withEndAction(new Runnable() {
-//                @Override
-//                public void run() {
-//                    curvedTick.animate().scaleX(1f).scaleY(1f).setDuration(1).start();
-//                }
-//               })
-//                .start();
-      //  constraintLayout.removeView(curvedTick);
-//        curvedTick.animate().scaleX(curvedTickWidth).scaleY(curvedTickHeight).setDuration(1).start();
-
-
+    public void generateAssetOnScreen(View v, ImageView asset) {
+       //Restart the view
+        if (viewHelper.isParentCheck(asset)) {
+            viewHelper.restartView(asset, constraintLayout);
+        }
+//        asset.setX(arr[0]);
+//        asset.setY(arr[1] - heightOffset);
+//        int[] arr = viewHelper.getViewLocation(v);
+//        int heightOffset = viewHelper.getHeightOffset(this , constraintLayout);
     }
 
     public class Equation {
