@@ -41,7 +41,6 @@ public class SessionDialog extends DialogFragment implements View.OnClickListene
     //widgets
     private EditText input;
     private Button playAgainBtn;
-    private Button cancelBtn;
 
     //Score
     TextView bestScoreText;
@@ -70,13 +69,7 @@ public class SessionDialog extends DialogFragment implements View.OnClickListene
         replaySessionBtn.setOnClickListener(this);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-
-        cancelBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getDialog().dismiss();
-            }
-        });
+        //                getDialog().dismiss();
 
         return view;
     }
