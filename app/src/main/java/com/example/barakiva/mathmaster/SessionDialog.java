@@ -68,8 +68,23 @@ public class SessionDialog extends DialogFragment implements View.OnClickListene
         replaySessionLabel.setOnClickListener(this);
         replaySessionBtn.setOnClickListener(this);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        //AlertDialog.Builder builder = new AlertDialog.Builder(context);
         //                getDialog().dismiss();
+        //Assigning listeners to btns
+
+        backToMenuBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                goBackToMenu();
+            }
+        });
+        nextLevelBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                goNextLevel();
+            }
+        });
+
 
         return view;
     }
@@ -80,11 +95,15 @@ public class SessionDialog extends DialogFragment implements View.OnClickListene
     }
     public void replayPreviousSession() {
         Intent calculationScreenIntent = new Intent(getActivity(), CalculationScreen.class);
+        calculationScreenIntent.putExtra("replay",true);
         startActivity(calculationScreenIntent);
     }
     public void goBackToMenu() {
         Intent goBackToMenuIntent = new Intent (getActivity(), MainActivity.class);
         startActivity(goBackToMenuIntent);
+    }
+    public void goNextLevel() {
+
     }
 
 
@@ -94,7 +113,8 @@ public class SessionDialog extends DialogFragment implements View.OnClickListene
         Dialog dialog = getDialog();
         if (dialog != null) {
             dialog.getWindow()
-                    .setLayout((int) (getScreenWidth(getActivity()) * .9), ViewGroup.LayoutParams.MATCH_PARENT);
+                    .setLayout((int) (getScreenWidth(getActivity()) * .9), ViewGroup.LayoutParams.MATCH_PARENT );
+                    //ViewGroup.LayoutParams.MATCH_PARENT)
         }
     }
     public static int getScreenWidth(Activity activity) {

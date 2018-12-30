@@ -7,15 +7,11 @@ import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
-import android.provider.ContactsContract;
 import android.support.constraint.ConstraintLayout;
-import android.support.constraint.ConstraintSet;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -23,16 +19,18 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.barakiva.mathmaster.animations.Tick;
-
-import java.util.Random;
+import com.example.barakiva.mathmaster.mathlogic.Calculation;
+import com.example.barakiva.mathmaster.mathlogic.Equation;
 
 public class CalculationScreen extends AppCompatActivity implements View.OnClickListener {
 
     //Elements
-    Random random;
     ProgressBar progressBar;
     ConstraintLayout constraintLayout;
     ImageView testCube;
+    //Math Logic
+    Calculation calculation = new Calculation();
+    Equation equation = new Equation();
     //Buttons
     Button testBtn;
     Button numPad1;
@@ -68,7 +66,6 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calculation_screen);
         String sessionId = getIntent().getStringExtra("Operation");
-        random = new Random();
         tick = new Tick(this.getApplicationContext());
         //Finding elements
         equationView = findViewById(R.id.equationView);
@@ -151,7 +148,8 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
         }
 
         //Check if answer is true
-        if (isUserDigitsEqualToEquationResult()) {
+        Calculation calculation = new Calculation();
+        if (calculation.isUserDigitsEqualToEquationResult(numbersEntered, result)) {
             if (Integer.parseInt(numbersEntered) == result) {
                 //Correct answer scenario
 //                generateAssetOnScreen(v);
@@ -202,15 +200,6 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
             v.vibrate(1000);
         }
     }
-
-
-    public boolean isUserDigitsEqualToEquationResult() {
-        if (numbersEntered.length() == Integer.toString(result).length()) {
-            return true;
-        } else {
-            return false;
-        }
-    }
     public void pushTheProgressBar() {
         int progress = (int) (((float)flux.getDrillAmount() / (float) amountOfDrills)* 100);
         ValueAnimator valueAnimator = ValueAnimator.ofFloat(progressBar.getProgress(), progress);
@@ -239,18 +228,9 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
 //        int[] arr = viewHelper.getViewLocation(v);
 //        int heightOffset = viewHelper.getHeightOffset(this , constraintLayout);
     }
-
-    public class Equation {
-        //Storing the equation numbers and operator
-        int firstNumber;
-        int secondNumber;
-        char operator;
-    }
-
     public void clearAnswer() {
         numbersEntered = "";
     }
-
     public void clearColor() {
         equationView.setTextColor(Color.GRAY);
     }
@@ -266,55 +246,36 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
         return true;
     }
 
-    public Equation generateNumbers(int difficulty) {
-        //Accessing the class
-        Equation equation = new Equation();
-        //Assigning random numbers
-        equation.firstNumber = (random.nextInt(10) + 1);
-        equation.secondNumber = (random.nextInt(10) + 1);
 
-        String sessionId = getIntent().getStringExtra("Operation");
-        switch (sessionId) {
-            case "addition":
-                equation.operator = '+';
-                break;
-            case "subtraction":
-                equation.operator = '-';
-                break;
-            case "multiplication":
-                equation.operator = '*';
-                break;
-            case "division":
-                equation.operator = '/';
-                break;
-        }
-        return equation;
-    }
 
     public int generateEquation(int a, int b) {
-        String sessionId = getIntent().getStringExtra("Operation");
-        int result = 0;
-        switch (sessionId) {
-            case "addition":
-                result = a + b;
-                break;
-            case "subtraction":
-                if (a < b) {
-                    result = b - a;
-                } else {
-                    result = a - b;
-                }
-                break;
-            case "multiplication":
-                result = a * b;
-                break;
-            case "division":
-                if (a < b) {
-                    result = b / a;
-                } else {
-                    result = a / b;
-                }
-                break;
+        if (getIntent().hasExtra("Operation")) {
+
+            String sessionId = getIntent().getStringExtra("Operation");
+            int result = 0;
+            switch (sessionId) {
+                case :
+                    result = a + b;
+                    break;
+                case "subtraction":
+                    if (a < b) {
+                        result = b - a;
+                    } else {
+                        result = a - b;
+                    }
+                    break;
+                case "multiplication":
+                    result = a * b;
+                    break;
+                case "division":
+                    if (a < b) {
+                        result = b / a;
+                    } else {
+                        result = a / b;
+                    }
+                    break;
+            }
+
         }
         return result;
     }
@@ -322,13 +283,12 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
     public double runOnce() {
         clearAnswer();
         clearColor();
-        Equation equation = new Equation();
-        equation = generateNumbers(1);
-        System.out.println(equation.firstNumber + " " + equation.secondNumber);
-        result = generateEquation(equation.firstNumber, equation.secondNumber);
+        equation.generateNumbers(1, this);
+        System.out.println(equation.getFirstNumber() + " " + equation.getSecondNumber());
+        result = generateEquation(equation.getFirstNumber(), equation.getSecondNumber());
         System.out.println(result);
-        equationView.setText(equation.firstNumber + " " + equation.operator + " " +
-                equation.secondNumber);
+        equationView.setText(equation.getFirstNumber() + " " + equation.getStringOperator() + " " +
+                equation.getSecondNumber());
         return result;
 
     }
@@ -336,7 +296,7 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
     public void testBtn(View view) {
         exercise.setBeginExerciseTimeStamp(exercise.getCurrentTime());
         runOnce();
-        openDialog();
+       // openDialog();
     }
     public void openDialog() {
         SessionDialog sessionDialog = new SessionDialog();
@@ -350,6 +310,18 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
         System.out.println("Workout has ended! Good job!");
     }
 
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+//        Intent previousIntent = getIntent();
+//        if (previousIntent != null) {
+//            if (previousIntent.getBooleanExtra("replay", true)) {
+//                Log.d("modal message", "hey there!");
+//                runOnce();
+//            }
+//        }
+    }
 }
 class Flux {
     private int drillAmount = 0;
