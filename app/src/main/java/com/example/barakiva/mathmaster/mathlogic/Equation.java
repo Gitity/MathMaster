@@ -13,7 +13,6 @@ public class Equation {
     private Random random = new Random();
 
     public Equation(Operator operatorType) {
-        if (operatorType != null) {
             switch(operatorType){
                 case ADDITION:
                     stringOperator = "+";
@@ -27,7 +26,6 @@ public class Equation {
                 case DIVISION:
                     stringOperator = "/";
                     break;
-            }
         }
         this.operatorType = operatorType;
     }

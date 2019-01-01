@@ -16,12 +16,13 @@ import com.example.barakiva.mathmaster.ViewHelper;
 
 public class Tick {
     private boolean isAnimating = false;
+    private ViewHelper viewHelper;
 
     public Context context;
-    public Tick (Context context) {
+    public Tick (Context context, ViewHelper viewHelper) {
         this.context = context;
+        this.viewHelper = viewHelper;
     }
-    ViewHelper viewHelper = new ViewHelper();
 
     public void animateCurvedTick(View v,final ImageView asset, ProgressBar progressBar,final ConstraintLayout constraintLayout) {
         //Height and width difference between progressbar and clicked btn

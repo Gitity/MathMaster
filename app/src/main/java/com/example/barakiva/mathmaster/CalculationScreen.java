@@ -53,13 +53,12 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
     String numbersEntered = "";
     int result;
     int amountOfDrills = 5;
-    Flux flux = new Flux();
 
     float density;
 
     //Classes
     Tick tick;
-    ViewHelper viewHelper = new ViewHelper();
+    ViewHelper viewHelper;
     Exercise exercise = new Exercise();
 
     @Override
@@ -67,11 +66,10 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
     onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calculation_screen);
-        String sessionId = getIntent().getStringExtra("Operation");
-        tick = new Tick(this.getApplicationContext());
+        tick = new Tick(this.getApplicationContext(), viewHelper);
         //Finding elements
         equationView = findViewById(R.id.equationView);
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        progressBar = findViewById(R.id.progressBar);
         constraintLayout = findViewById(R.id.constraintLayout);
         //Gameification
         curvedTick = new ImageView(this);
@@ -108,6 +106,7 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
 
         //Helper classes
          equation= new Equation(getOperatorType());
+        viewHelper = new ViewHelper(constraintLayout);
 
         clearAnswer.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -115,12 +114,6 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
                 clearAnswer();
             }
         });
-
-        System.out.println(sessionId);
-
-        //Session Over
-
-
     }
     public Operator getOperatorType() {
         Operator operator;
@@ -129,76 +122,76 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
         } else {
             operator = null;
         }
-
         return operator;
     }
 
-    public void handleOnClick(View v, ImageView asset) {
-        //Check if valid button
-        if (ifClickIsButton(v)) {
-            updateNumberInputWithClick(v);
+    public void handleOnClick(View view, ImageView asset) {
+        if (view instanceof Button) {
+            updateNumberInputWithClick(view);
             if (!(viewHelper.hasParent(asset, this))) {
                 Log.d("GENERATED", "initiated");
-                generateAssetOnScreen(v, asset);
+                generateAssetOnScreen(view, asset);
             }
-            viewHelper.addView(asset, viewHelper.getViewLocation(v),
-                    viewHelper.getHeightOffset(this,constraintLayout), constraintLayout);
+            viewHelper.addView(asset, viewHelper.getViewLocation(view));
 
             if (!tick.isAnimating()) {
-                tick.animateCurvedTick(v, asset, progressBar, constraintLayout);
+                tick.animateCurvedTick(view, asset, progressBar, constraintLayout);
             } else {
                 Log.d("Animation state", "Tick is animating, please stand by");
             }
-
-            if (!isUserInTheRightDirection()) {
-                System.out.println("Wrong start");
-                startVibration();
-                clearAnswer();
-                equationView.setTextColor(Color.RED);
-            }
+            if (!isUserInputInTheRightDirection()) { wrongAnswer(); }
         } else {
             System.out.println("This was not a button!");
         }
-
-        //Check if answer is true
         Calculation calculation = new Calculation();
-        if (calculation.isUserDigitsEqualToEquationResult(numbersEntered, result)) {
-            if (Integer.parseInt(numbersEntered) == result) {
-                //Correct answer scenario
-//                generateAssetOnScreen(v);
-//                animateCurvedTick(v);
-                Thread t = new Thread(){
-                    public void run(){
-                        playCorrectAnswerSound();
-                    }
-                };
-                t.start();
-                System.out.println("Correct answer!");
-                clearAnswer();
-                flux.setDrillAmount(flux.getDrillAmount()+1);
-                System.out.println("Flux is " + flux.getDrillAmount());
-                if (flux.getDrillAmount() == amountOfDrills) {
-                    pushTheProgressBar();
-                    workoutHasEnded();
-                } else {
-                    pushTheProgressBar();
-                    runOnce();
-                }
-            } else {
-                //Wrong answer scenario
-                startVibration();
-                System.out.println("Wrong answer nigga");
-                clearAnswer();
-                equationView.setTextColor(Color.RED);
-            }
+        //Does the length of the user input equal to the equation length?
+        if (calculation.isUserInputLengthEqualToEquationLength(numbersEntered, result)) {
+            //Does the user input equal to the result?
+            isUserInputCorrect();
         }
     }
+    public void isUserInputCorrect() {
+        if (Integer.parseInt(numbersEntered) == result) {
+            correctAnswer();
+        } else {
+            wrongAnswer();
+        }
+    }
+    public void correctAnswer() {
+        //Correct answer scenario
+//                generateAssetOnScreen(v);
+//                animateCurvedTick(v);
+        Thread t = new Thread(){
+            public void run(){
+                playCorrectAnswerSound();
+            }
+        };
+        t.start();
+        System.out.println("Correct answer!");
+        clearAnswer();
+        exercise.setDrillAmount(exercise.getDrillAmount()+1);
+        System.out.println("Flux is " + exercise.getDrillAmount());
+        endOfDrillCheck();
+    }
+    public void wrongAnswer() {
+        startVibration();
+        System.out.println("Wrong answer nigga");
+        clearAnswer();
+        equationView.setTextColor(Color.RED);
+    }
+    public void endOfDrillCheck() {
+        if (exercise.getDrillAmount() == amountOfDrills) {
+            pushTheProgressBar();
+            workoutHasEnded();
+        } else {
+            pushTheProgressBar();
+            runOnce();
+        }
+    }
+
     @Override
     public void onClick(View v) {
         handleOnClick(v, testCube);
-    }
-    public boolean ifClickIsButton(View v) {
-        return v instanceof Button;
     }
 
     public void updateNumberInputWithClick(View v) {
@@ -221,7 +214,7 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
         }
     }
     public void pushTheProgressBar() {
-        int progress = (int) (((float)flux.getDrillAmount() / (float) amountOfDrills)* 100);
+        int progress = (int) (((float)exercise.getDrillAmount() / (float) amountOfDrills)* 100);
         ValueAnimator valueAnimator = ValueAnimator.ofFloat(progressBar.getProgress(), progress);
         valueAnimator.setInterpolator(new
                 AccelerateDecelerateInterpolator());
@@ -241,7 +234,7 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
     public void generateAssetOnScreen(View v, ImageView asset) {
        //Restart the view
         if (viewHelper.isParentCheck(asset)) {
-            viewHelper.restartView(asset, constraintLayout);
+            viewHelper.restartView(asset);
         }
 //        asset.setX(arr[0]);
 //        asset.setY(arr[1] - heightOffset);
@@ -249,7 +242,7 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
 //        int heightOffset = viewHelper.getHeightOffset(this , constraintLayout);
     }
 
-    public boolean isUserInTheRightDirection() {
+    public boolean isUserInputInTheRightDirection() {
         String[] numbersEnteredDigits = numbersEntered.split("");
         String[] resultDigits = Integer.toString(result).split("");
 
@@ -285,7 +278,7 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
     public void testBtn(View view) {
         exercise.setBeginExerciseTimeStamp(exercise.getCurrentTime());
         runOnce();
-       // openDialog();
+        openDialog();
     }
     public void openDialog() {
         SessionDialog sessionDialog = new SessionDialog();
@@ -299,31 +292,18 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
         System.out.println("Workout has ended! Good job!");
     }
 
-
     @Override
     protected void onPostResume() {
         super.onPostResume();
-//        Intent previousIntent = getIntent();
-//        if (previousIntent != null) {
-//            if (previousIntent.getBooleanExtra("replay", true)) {
-//                Log.d("modal message", "hey there!");
-//                runOnce();
-//            }
-//        }
+        Intent previousIntent = getIntent();
+        if (previousIntent != null) {
+            if (previousIntent.getBooleanExtra("replay", true)) {
+                Log.d("modal message", "hey there!");
+                runOnce();
+            }
+        }
     }
 }
-class Flux {
-    private int drillAmount = 0;
-    public void setDrillAmount(int da) {
-            this.drillAmount = da;
-            System.out.println("Drillamount is " + this.drillAmount + " !");
-    }
-
-    public int getDrillAmount() {
-        return drillAmount;
-    }
-}
-
 
     //Chest
 

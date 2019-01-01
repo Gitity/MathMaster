@@ -7,9 +7,19 @@ import android.support.constraint.ConstraintSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.AccelerateInterpolator;
 import android.widget.ImageView;
 
 public class ViewHelper {
+
+    Activity activity;
+    ConstraintLayout constraintLayout;
+
+    public ViewHelper (ConstraintLayout constraintLayout) {
+        this.constraintLayout = constraintLayout;
+        this.activity =  (Activity) constraintLayout.getContext();
+    }
+
     public boolean hasParent (ImageView asset, Activity activity) {
         if(activity.findViewById(asset.getId()) == null) {
             return false;
@@ -18,9 +28,9 @@ public class ViewHelper {
         }
     }
 
-    public int getHeightOffset(Activity context , ConstraintLayout constraintLayout) {
+    private int getHeightOffset() {
         DisplayMetrics dm = new DisplayMetrics();
-        context.getWindowManager().getDefaultDisplay().getMetrics(dm);
+        activity.getWindowManager().getDefaultDisplay().getMetrics(dm);
         return dm.heightPixels - constraintLayout.getMeasuredHeight();
     }
     public int[] getViewLocation(View v) {
@@ -38,7 +48,7 @@ public class ViewHelper {
             return false;
         }
     }
-    public void restartView(ImageView asset, ConstraintLayout constraintLayout) {
+    public void restartView(ImageView asset) {
         ConstraintSet removeSet = new ConstraintSet();
         Log.d("Asset Check", asset.toString());
 
@@ -53,14 +63,16 @@ public class ViewHelper {
         removeSet.clear(asset.getId(), ConstraintSet.LEFT);
         removeSet.applyTo(parent);
     }
-    public void addView(ImageView asset, int[] arr, int heightOffset, ConstraintLayout constraintLayout) {
+    public void addView(ImageView asset, int[] viewCoordinates) {
         constraintLayout.removeView(asset);
         constraintLayout.addView(asset, 0);
         asset.setVisibility(View.VISIBLE);
         ConstraintSet set = new ConstraintSet();
         set.clone(constraintLayout);
-        set.connect(asset.getId(),ConstraintSet.TOP, constraintLayout.getId(),ConstraintSet.TOP, arr[1] - heightOffset);
-        set.connect(asset.getId(),ConstraintSet.LEFT, constraintLayout.getId(),ConstraintSet.LEFT, arr[0]);
+        set.connect(asset.getId(),ConstraintSet.TOP, constraintLayout.getId(),
+                ConstraintSet.TOP, viewCoordinates[1] - getHeightOffset());
+        set.connect(asset.getId(),ConstraintSet.LEFT,
+                constraintLayout.getId(),ConstraintSet.LEFT, viewCoordinates[0]);
         set.applyTo(constraintLayout);
         asset.setElevation(1);
     }

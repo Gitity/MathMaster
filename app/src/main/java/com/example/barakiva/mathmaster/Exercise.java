@@ -7,6 +7,7 @@ public class Exercise {
     Intent intent;
     private long beginExerciseTimeStamp;
     private long endExerciseTimeStamp;
+    private int drillAmount = 0;
 
 
 
@@ -18,6 +19,14 @@ public class Exercise {
 //        intent = new Intent(context);
 //
 //    }
+    public void setDrillAmount(int da) {
+        this.drillAmount = da;
+        System.out.println("Drillamount is " + this.drillAmount + " !");
+    }
+
+    public int getDrillAmount() {
+        return drillAmount;
+    }
 
     public long getCurrentTime() {
         return System.currentTimeMillis();
