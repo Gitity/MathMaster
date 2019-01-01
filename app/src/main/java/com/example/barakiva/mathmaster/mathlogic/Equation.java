@@ -10,9 +10,9 @@ public class Equation {
     private int secondNumber;
     private String stringOperator;
     private Operator operatorType;
-    Random random = new Random();
+    private Random random = new Random();
 
-    public Equation() {
+    public Equation(Operator operatorType) {
         if (operatorType != null) {
             switch(operatorType){
                 case ADDITION:
@@ -29,35 +29,43 @@ public class Equation {
                     break;
             }
         }
+        this.operatorType = operatorType;
     }
 
-    public Equation generateNumbers(int difficulty, Activity activity) {
-        //Accessing the class
-        Equation equation = new Equation();
+    public void generateNumbers(int difficulty) {
         //Assigning random numbers
-        equation.firstNumber = (random.nextInt(10) + 1);
-        equation.secondNumber = (random.nextInt(10) + 1);
-
-//        if (activity.getIntent().hasExtra("Operation")) {
-//            String sessionId = activity.getIntent().getStringExtra("Operation");
-//            switch (sessionId) {
-//                case "addition":
-//                    equation.stringOperator = '+';
-//                    break;
-//                case "subtraction":
-//                    equation.stringOperator = '-';
-//                    break;
-//                case "multiplication":
-//                    equation.stringOperator = '*';
-//                    break;
-//                case "division":
-//                    equation.stringOperator = '/';
-//                    break;
-//            }
-//        }
-
-        return equation;
+        firstNumber = (random.nextInt(10) + 1);
+        secondNumber = (random.nextInt(10) + 1);
     }
+
+    public int generateEquation(int a, int b) {
+        int result = 0;
+        switch (operatorType) {
+            case ADDITION:
+                result = a + b;
+                break;
+            case SUBTRACTION:
+                if (a < b) {
+                    result = b - a;
+                } else {
+                    result = a - b;
+                }
+                break;
+            case MULTIPLICATION:
+                result = a * b;
+                break;
+            case DIVISION:
+                if (a < b) {
+                    result = b / a;
+                } else {
+                    result = a / b;
+                }
+                break;
+        }
+        return result;
+    }
+
+
     public int getFirstNumber() {
         return firstNumber;
     }

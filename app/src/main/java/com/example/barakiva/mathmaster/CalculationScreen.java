@@ -2,6 +2,7 @@ package com.example.barakiva.mathmaster;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Build;
@@ -21,6 +22,7 @@ import android.widget.TextView;
 import com.example.barakiva.mathmaster.animations.Tick;
 import com.example.barakiva.mathmaster.mathlogic.Calculation;
 import com.example.barakiva.mathmaster.mathlogic.Equation;
+import com.example.barakiva.mathmaster.mathlogic.Operator;
 
 public class CalculationScreen extends AppCompatActivity implements View.OnClickListener {
 
@@ -30,7 +32,7 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
     ImageView testCube;
     //Math Logic
     Calculation calculation = new Calculation();
-    Equation equation = new Equation();
+    Equation equation;
     //Buttons
     Button testBtn;
     Button numPad1;
@@ -102,8 +104,10 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
         numPad0 = findViewById(R.id.numPad0);
         numPad0.setOnClickListener(this);
         clearAnswer = findViewById(R.id.numPadClear);
-        //Helper classes
 
+
+        //Helper classes
+         equation= new Equation(getOperatorType());
 
         clearAnswer.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -118,12 +122,21 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
 
 
     }
+    public Operator getOperatorType() {
+        Operator operator;
+        if(getIntent().hasExtra("Operation")) {
+            operator = (Operator) getIntent().getSerializableExtra("Operation");
+        } else {
+            operator = null;
+        }
+
+        return operator;
+    }
 
     public void handleOnClick(View v, ImageView asset) {
         //Check if valid button
-        if (v instanceof Button) {
-            Button b = (Button) v;
-            numbersEntered += b.getText();
+        if (ifClickIsButton(v)) {
+            updateNumberInputWithClick(v);
             if (!(viewHelper.hasParent(asset, this))) {
                 Log.d("GENERATED", "initiated");
                 generateAssetOnScreen(v, asset);
@@ -184,7 +197,14 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
     public void onClick(View v) {
         handleOnClick(v, testCube);
     }
+    public boolean ifClickIsButton(View v) {
+        return v instanceof Button;
+    }
 
+    public void updateNumberInputWithClick(View v) {
+        Button b = (Button) v;
+        numbersEntered += b.getText();
+    }
     public void playCorrectAnswerSound() {
         final MediaPlayer mp = MediaPlayer.create(this, R.raw.correct);
         mp.start();
@@ -228,12 +248,7 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
 //        int[] arr = viewHelper.getViewLocation(v);
 //        int heightOffset = viewHelper.getHeightOffset(this , constraintLayout);
     }
-    public void clearAnswer() {
-        numbersEntered = "";
-    }
-    public void clearColor() {
-        equationView.setTextColor(Color.GRAY);
-    }
+
     public boolean isUserInTheRightDirection() {
         String[] numbersEnteredDigits = numbersEntered.split("");
         String[] resultDigits = Integer.toString(result).split("");
@@ -246,51 +261,25 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
         return true;
     }
 
-
-
-    public int generateEquation(int a, int b) {
-        if (getIntent().hasExtra("Operation")) {
-
-            String sessionId = getIntent().getStringExtra("Operation");
-            int result = 0;
-            switch (sessionId) {
-                case :
-                    result = a + b;
-                    break;
-                case "subtraction":
-                    if (a < b) {
-                        result = b - a;
-                    } else {
-                        result = a - b;
-                    }
-                    break;
-                case "multiplication":
-                    result = a * b;
-                    break;
-                case "division":
-                    if (a < b) {
-                        result = b / a;
-                    } else {
-                        result = a / b;
-                    }
-                    break;
-            }
-
-        }
-        return result;
-    }
-
-    public double runOnce() {
+    public void runOnce() {
         clearAnswer();
         clearColor();
-        equation.generateNumbers(1, this);
+        //TODO check if I should encapsulate generateNumbers() within generateEquation()
+        equation.generateNumbers(1);
+        result = equation.generateEquation(equation.getFirstNumber(), equation.getSecondNumber());
+        setEquationView();
         System.out.println(equation.getFirstNumber() + " " + equation.getSecondNumber());
-        result = generateEquation(equation.getFirstNumber(), equation.getSecondNumber());
         System.out.println(result);
+    }
+    public void clearAnswer() {
+        numbersEntered = "";
+    }
+    public void clearColor() {
+        equationView.setTextColor(Color.GRAY);
+    }
+    public void setEquationView() {
         equationView.setText(equation.getFirstNumber() + " " + equation.getStringOperator() + " " +
                 equation.getSecondNumber());
-        return result;
-
     }
 
     public void testBtn(View view) {
