@@ -1,6 +1,6 @@
 package com.example.barakiva.mathmaster.mathlogic;
 
-import android.app.Activity;
+import android.util.Log;
 
 import java.util.Random;
 
@@ -30,33 +30,33 @@ public class Equation {
         this.operatorType = operatorType;
     }
 
-    public void generateNumbers(int difficulty) {
-        //Assigning random numbers
+    public void generateRandomNumbers(int difficulty) {
         firstNumber = (random.nextInt(10) + 1);
         secondNumber = (random.nextInt(10) + 1);
+        Log.d("Random generation", "This worked");
     }
 
-    public int generateEquation(int a, int b) {
+    public int generateEquation(int firstNumber, int secondNumber) {
         int result = 0;
         switch (operatorType) {
             case ADDITION:
-                result = a + b;
+                result = firstNumber + secondNumber;
                 break;
             case SUBTRACTION:
-                if (a < b) {
-                    result = b - a;
+                if (firstNumber < secondNumber) {
+                    result = secondNumber - firstNumber;
                 } else {
-                    result = a - b;
+                    result = firstNumber - secondNumber;
                 }
                 break;
             case MULTIPLICATION:
-                result = a * b;
+                result = firstNumber * secondNumber;
                 break;
             case DIVISION:
-                if (a < b) {
-                    result = b / a;
+                if (firstNumber < secondNumber) {
+                    result = secondNumber / firstNumber;
                 } else {
-                    result = a / b;
+                    result = firstNumber / secondNumber;
                 }
                 break;
         }

@@ -6,12 +6,15 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.example.barakiva.mathmaster.mathlogic.Operator;
+import com.crashlytics.android.Crashlytics;
+import io.fabric.sdk.android.Fabric;
 
 public class MainActivity extends AppCompatActivity {
     Intent intent;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_arithmetic_screen);
         intent = new Intent(MainActivity.this, CalculationScreen.class);
     }

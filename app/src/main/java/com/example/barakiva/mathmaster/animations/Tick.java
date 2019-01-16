@@ -19,9 +19,9 @@ public class Tick {
     private ViewHelper viewHelper;
 
     public Context context;
-    public Tick (Context context, ViewHelper viewHelper) {
-        this.context = context;
+    public Tick (ViewHelper viewHelper) {
         this.viewHelper = viewHelper;
+        this.context = viewHelper.getActivity();
     }
 
     public void animateCurvedTick(View v,final ImageView asset, ProgressBar progressBar,final ConstraintLayout constraintLayout) {

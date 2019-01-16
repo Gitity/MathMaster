@@ -2,7 +2,7 @@ package com.example.barakiva.mathmaster;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Build;
@@ -24,7 +24,7 @@ import com.example.barakiva.mathmaster.mathlogic.Calculation;
 import com.example.barakiva.mathmaster.mathlogic.Equation;
 import com.example.barakiva.mathmaster.mathlogic.Operator;
 
-public class CalculationScreen extends AppCompatActivity implements View.OnClickListener {
+public class CalculationScreen extends AppCompatActivity implements View.OnClickListener, OnReplay {
 
     //Elements
     ProgressBar progressBar;
@@ -52,7 +52,7 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
 
     String numbersEntered = "";
     int result;
-    int amountOfDrills = 5;
+    int amountOfDrills = 3;
 
     float density;
 
@@ -60,13 +60,18 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
     Tick tick;
     ViewHelper viewHelper;
     Exercise exercise = new Exercise();
-
+    OnReplay onReplay = new OnReplay() {
+        @Override
+        public void onReplayClicked() {
+            runWorkout();
+        }
+    };
+    String actInfo = "Activity Info";
     @Override
     protected void
     onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calculation_screen);
-        tick = new Tick(this.getApplicationContext(), viewHelper);
         //Finding elements
         equationView = findViewById(R.id.equationView);
         progressBar = findViewById(R.id.progressBar);
@@ -102,43 +107,54 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
         numPad0 = findViewById(R.id.numPad0);
         numPad0.setOnClickListener(this);
         clearAnswer = findViewById(R.id.numPadClear);
-
-
         //Helper classes
-         equation= new Equation(getOperatorType());
+        equation= new Equation(getOperatorType());
         viewHelper = new ViewHelper(constraintLayout);
-
+        tick = new Tick(viewHelper);
+        //Onclick methods
         clearAnswer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 clearAnswer();
             }
         });
+        //Saving operator data
+        if (getIntent().hasExtra("Operation")) {
+            saveEnum();
+        }
+        Log.d(actInfo, "Activity created!");
+
     }
+
+
     public Operator getOperatorType() {
         Operator operator;
         if(getIntent().hasExtra("Operation")) {
             operator = (Operator) getIntent().getSerializableExtra("Operation");
+        } else if (getStoredEnum() != null) {
+            operator = getStoredEnum();
         } else {
             operator = null;
         }
         return operator;
     }
+    public void createAsset(View view, ImageView asset) {
+        if (!(viewHelper.hasParent(asset, this))) {
+            Log.d("GENERATED", "initiated");
+            generateAssetOnScreen(view, asset);
+        }
+        viewHelper.addView(asset, viewHelper.getViewLocation(view));
+        if (!tick.isAnimating()) {
+            tick.animateCurvedTick(view, asset, progressBar, constraintLayout);
+        } else {
+            Log.d("Animation state", "Tick is animating, please stand by");
+        }
+    }
 
     public void handleOnClick(View view, ImageView asset) {
         if (view instanceof Button) {
             updateNumberInputWithClick(view);
-            if (!(viewHelper.hasParent(asset, this))) {
-                Log.d("GENERATED", "initiated");
-                generateAssetOnScreen(view, asset);
-            }
-            viewHelper.addView(asset, viewHelper.getViewLocation(view));
-
-            if (!tick.isAnimating()) {
-                tick.animateCurvedTick(view, asset, progressBar, constraintLayout);
-            } else {
-                Log.d("Animation state", "Tick is animating, please stand by");
-            }
+            createAsset(view, asset);
             if (!isUserInputInTheRightDirection()) { wrongAnswer(); }
         } else {
             System.out.println("This was not a button!");
@@ -167,11 +183,13 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
             }
         };
         t.start();
-        System.out.println("Correct answer!");
         clearAnswer();
         exercise.setDrillAmount(exercise.getDrillAmount()+1);
-        System.out.println("Flux is " + exercise.getDrillAmount());
         endOfDrillCheck();
+        System.out.println("Correct answer!");
+        System.out.println("Flux is " + exercise.getDrillAmount());
+
+
     }
     public void wrongAnswer() {
         startVibration();
@@ -185,7 +203,7 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
             workoutHasEnded();
         } else {
             pushTheProgressBar();
-            runOnce();
+            runWorkout();
         }
     }
 
@@ -254,11 +272,11 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
         return true;
     }
 
-    public void runOnce() {
+    public void runWorkout() {
         clearAnswer();
         clearColor();
-        //TODO check if I should encapsulate generateNumbers() within generateEquation()
-        equation.generateNumbers(1);
+        //TODO check if I should encapsulate generateRandomNumbers() within generateEquation()
+        equation.generateRandomNumbers(1);
         result = equation.generateEquation(equation.getFirstNumber(), equation.getSecondNumber());
         setEquationView();
         System.out.println(equation.getFirstNumber() + " " + equation.getSecondNumber());
@@ -277,17 +295,44 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
 
     public void testBtn(View view) {
         exercise.setBeginExerciseTimeStamp(exercise.getCurrentTime());
-        runOnce();
+        runWorkout();
         openDialog();
     }
+    public void saveEnum() {
+        Operator op  = Operator.fromId(2);
+        if (op != null) {
+            Log.d("Enum is", op.toString());
+            Log.d("Enum number is", Integer.toString(getOperatorType().getId()));
+        }
+        SharedPreferences.Editor sharedEditor = getSharedPreferences("EnumValue",MODE_PRIVATE).edit();
+        sharedEditor.putInt("Operation", getOperatorType().getId());
+        sharedEditor.apply();
+    }
+    public Operator getStoredEnum() {
+        Operator operator;
+        SharedPreferences sharedOutput = getSharedPreferences("EnumValue", MODE_PRIVATE);
+        int restoredVal = sharedOutput.getInt("Operation", 0);
+
+        if (restoredVal != 0) {
+            operator = Operator.fromId(restoredVal);
+            Log.d("Restored value is",operator.toString());
+            return operator;
+        } else {
+            return null;
+        }
+    }
+
     public void openDialog() {
         SessionDialog sessionDialog = new SessionDialog();
         sessionDialog.setPassedContext(this);
         sessionDialog.show(getFragmentManager(), "My Dialog");
 
+        Bundle bundle = new Bundle();
+        //bundle.put
     }
     public void workoutHasEnded() {
         exercise.setEndExerciseTimeStamp(exercise.getCurrentTime());
+        openDialog();
         System.out.println("Good job! It only took you " + exercise.getSessionLength() + " seconds!");
         System.out.println("Workout has ended! Good job!");
     }
@@ -295,13 +340,29 @@ public class CalculationScreen extends AppCompatActivity implements View.OnClick
     @Override
     protected void onPostResume() {
         super.onPostResume();
-        Intent previousIntent = getIntent();
-        if (previousIntent != null) {
-            if (previousIntent.getBooleanExtra("replay", true)) {
-                Log.d("modal message", "hey there!");
-                runOnce();
-            }
-        }
+        Log.d(actInfo, "Activity resumed!");
+
+        //runWorkout();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        runWorkout();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(actInfo, "Activity destroyed!");
+    }
+
+    @Override
+    public void onReplayClicked() {
+        runWorkout();
+    }
+    public void testWorld() {
+        System.out.println("hello there cruel world");
     }
 }
 

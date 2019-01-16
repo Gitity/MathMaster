@@ -19,6 +19,10 @@
             </intent-filter>
         </activity>
         <activity android:name=".CalculationScreen" />
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="b491c15544e733de485b42db330f4b14f4014eb4" />
     </application>
 
+    <uses-permission android:name="android.permission.INTERNET" />
 </manifest>

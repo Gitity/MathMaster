@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.Fragment;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
@@ -16,6 +18,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.example.barakiva.mathmaster.mathlogic.Calculation;
+
+import java.lang.reflect.Field;
 
 public class SessionDialog extends DialogFragment implements View.OnClickListener {
 
@@ -86,6 +92,7 @@ public class SessionDialog extends DialogFragment implements View.OnClickListene
         });
 
 
+
         return view;
     }
 
@@ -94,9 +101,7 @@ public class SessionDialog extends DialogFragment implements View.OnClickListene
         replayPreviousSession();
     }
     public void replayPreviousSession() {
-        Intent calculationScreenIntent = new Intent(getActivity(), CalculationScreen.class);
-        calculationScreenIntent.putExtra("replay",true);
-        startActivity(calculationScreenIntent);
+        getDialog().dismiss();
     }
     public void goBackToMenu() {
         Intent goBackToMenuIntent = new Intent (getActivity(), MainActivity.class);
@@ -117,6 +122,17 @@ public class SessionDialog extends DialogFragment implements View.OnClickListene
                     //ViewGroup.LayoutParams.MATCH_PARENT)
         }
     }
+
+
+
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        super.onDismiss(dialog);
+        CalculationScreen calculation = new CalculationScreen();
+        calculation.onResume();
+    }
+
+
     public static int getScreenWidth(Activity activity) {
         Point size = new Point();
         activity.getWindowManager().getDefaultDisplay().getSize(size);

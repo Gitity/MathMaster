@@ -15,6 +15,7 @@ public class ViewHelper {
     Activity activity;
     ConstraintLayout constraintLayout;
 
+
     public ViewHelper (ConstraintLayout constraintLayout) {
         this.constraintLayout = constraintLayout;
         this.activity =  (Activity) constraintLayout.getContext();
@@ -76,5 +77,9 @@ public class ViewHelper {
         set.applyTo(constraintLayout);
         asset.setElevation(1);
     }
+    public Activity getActivity() {
+        return activity;
+    }
+
 
 }
